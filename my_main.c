@@ -74,8 +74,8 @@ void my_main() {
 
   for (i=0;i<lastop;i++) {  
     switch (op[i].opcode) {
-
       case PUSH:
+        
         break;
 
       case POP:
