@@ -75,19 +75,31 @@ void my_main() {
   for (i=0;i<lastop;i++) {  
     switch (op[i].opcode) {
       case PUSH:
-        
+        push(s);
         break;
 
       case POP:
+        pop(s);
         break;
 
       case MOVE:
+        tmp = make_translate(op[i].op.move.d[0], op[i].op.move.d[1], op[i].op.move.d[2]);
+        matrix_mult(peek(s), tmp);
+        copy_matrix(tmp, peek(s));
         break;
 
       case SCALE:
+        tmp = make_scale(op[i].op.scale.d[0], op[i].op.scale.d[1], op[i].op.scale.d[2]);
+        matrix_mult(peek(s), tmp);
+        copy_matrix(tmp, peek(s));
         break;
 
       case ROTATE:
+        if(op[i].op.rotate.axis == 0) tmp = make_rotX(op[i].op.rotate.degrees * (M_PI / 180));
+        if(op[i].op.rotate.axis == 1) tmp = make_rotY(op[i].op.rotate.degrees * (M_PI / 180));
+        if(op[i].op.rotate.axis == 2) tmp = make_rotZ(op[i].op.rotate.degrees * (M_PI / 180));
+        matrix_mult(peek(s), tmp);
+        copy_matrix(tmp, peek(s));
         break;
 
       case BOX:
