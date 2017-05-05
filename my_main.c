@@ -67,10 +67,11 @@ void my_main() {
   struct stack *s;
   screen t;
   color g;
-  
+
   s = new_stack();
   tmp = new_matrix(4, 1000);
   clear_screen( t );
+  double step = 0.1; ////////PLACEHOLDER
 
   for (i=0;i<lastop;i++) {  
     switch (op[i].opcode) {
@@ -102,23 +103,57 @@ void my_main() {
         copy_matrix(tmp, peek(s));
         break;
 
+      double x, y, z;
+      double width, height, depth;
       case BOX:
-        
+        x = op[i].op.box.d0[0]; y = op[i].op.box.d0[1]; z = op[i].op.box.d0[2];
+        width = op[i].op.box.d1[0]; height = op[i].op.box.d1[1]; depth = op[i].op.box.d1[2];
+        add_box(tmp, x, y, z, width, height, depth);
+
+        matrix_mult(peek(s), tmp);
+        draw_polygons(tmp, t, g);
+        tmp->lastcol = 0;
         break;
 
+      double r;
       case SPHERE:
+        x = op[i].op.sphere.d[0]; y = op[i].op.sphere.d[1]; z = op[i].op.sphere.d[2];
+        r = op[i].op.sphere.r;
+        add_sphere(tmp, x, y, z, r, step);
+
+        matrix_mult(peek(s), tmp);
+        draw_polygons(tmp, t, g);
+        tmp->lastcol = 0;
         break;
 
+      double r0, r1;
       case TORUS:
+        x = op[i].op.torus.d[0]; y = op[i].op.torus.d[1]; z = op[i].op.torus.d[2];
+        r0 = op[i].op.torus.r0; r1 = op[i].op.torus.r1;
+        add_torus(tmp, x, y, z, r0, r1, step);
+
+        matrix_mult(peek(s), tmp);
+        draw_polygons(tmp, t, g);
+        tmp->lastcol = 0;
         break;
 
+      double x0, y0, z0;
+      double x1, y1, z1;
       case LINE:
+        x0 = op[i].op.line.p0[0]; y0 = op[i].op.line.p0[1]; z0 = op[i].op.line.p0[2];
+        x1 = op[i].op.line.p1[0]; y1 = op[i].op.line.p1[1]; z1 = op[i].op.line.p1[2];
+        add_edge(tmp, x0, y0, z0, x1, y1, z1);
+
+        matrix_mult(peek(s), tmp);
+        draw_lines(tmp, t, g);
+        tmp->lastcol = 0;
         break;
 
       case SAVE:
         break;
 
       case DISPLAY:
+        display(t);
         break;
     }
   }
