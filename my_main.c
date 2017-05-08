@@ -172,7 +172,11 @@ void my_main() {
         tmp->lastcol = 0;
         break;
 
+      char* filename;
       case SAVE:
+        filename = op[i].op.save.p->name;
+        printf("filename: %s\n", filename);
+        save_extension(t, filename);
         break;
 
       case DISPLAY:
