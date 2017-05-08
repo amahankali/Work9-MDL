@@ -64,45 +64,61 @@ void my_main() {
 
   int i;
   struct matrix *tmp;
+  struct matrix *polygons;
   struct stack *s;
   screen t;
   color g;
-  printf("CALLED\n");
+  printf("USING MY MAIN\n");
 
   s = new_stack();
-  tmp = new_matrix(4, 1000);
+  tmp = new_matrix(4, 4);
+  polygons = new_matrix(4, 1000);
   clear_screen( t );
   double step = 0.1; ////////PLACEHOLDER
 
   for (i=0;i<lastop;i++) {  
     switch (op[i].opcode) {
       case PUSH:
+        printf("PUSHED\n");
         push(s);
         break;
 
       case POP:
+        printf("POPPED\n");
         pop(s);
         break;
 
+      double dx, dy, dz;
       case MOVE:
-        printf("MOVE\n");
-        tmp = make_translate(op[i].op.move.d[0], op[i].op.move.d[1], op[i].op.move.d[2]);
+        dx = op[i].op.move.d[0];
+        dy = op[i].op.move.d[1];
+        dz = op[i].op.move.d[2];
+        printf("move by (%f, %f, %f)\n", dx, dy, dz);
+        tmp = make_translate(dx, dy, dz);
         matrix_mult(peek(s), tmp);
         copy_matrix(tmp, peek(s));
         break;
 
+      double sx, sy, sz;
       case SCALE:
-        printf("SCALE\n");
-        tmp = make_scale(op[i].op.scale.d[0], op[i].op.scale.d[1], op[i].op.scale.d[2]);
+        sx = op[i].op.scale.d[0];
+        sy = op[i].op.scale.d[1];
+        sz = op[i].op.scale.d[2];
+        printf("scale by (%f, %f, %f)\n", sx, sy, sz);
+        tmp = make_scale(sx, sy, sz);
         matrix_mult(peek(s), tmp);
         copy_matrix(tmp, peek(s));
         break;
 
+      int axis;
+      double theta;
       case ROTATE:
-        printf("ROTATE\n");
-        if(op[i].op.rotate.axis == 0) tmp = make_rotX(op[i].op.rotate.degrees * (M_PI / 180));
-        if(op[i].op.rotate.axis == 1) tmp = make_rotY(op[i].op.rotate.degrees * (M_PI / 180));
-        if(op[i].op.rotate.axis == 2) tmp = make_rotZ(op[i].op.rotate.degrees * (M_PI / 180));
+        axis = op[i].op.rotate.axis;
+        theta = op[i].op.rotate.degrees;
+        printf("Rotation: axis = %d, angle = %f\n", axis, theta);
+        if(axis == 0) tmp = make_rotX(theta * (M_PI / 180));
+        if(axis == 1) tmp = make_rotY(theta * (M_PI / 180));
+        if(axis == 2) tmp = make_rotZ(theta * (M_PI / 180));
         matrix_mult(peek(s), tmp);
         copy_matrix(tmp, peek(s));
         break;
@@ -110,26 +126,25 @@ void my_main() {
       double x, y, z;
       double width, height, depth;
       case BOX:
-        printf("BOX\n");
         x = op[i].op.box.d0[0]; y = op[i].op.box.d0[1]; z = op[i].op.box.d0[2];
         width = op[i].op.box.d1[0]; height = op[i].op.box.d1[1]; depth = op[i].op.box.d1[2];
-        add_box(tmp, x, y, z, width, height, depth);
-
-        matrix_mult(peek(s), tmp);
-        draw_polygons(tmp, t, g);
-        tmp->lastcol = 0;
+        printf("Adding box: x = %f, y = %f, z = %f, width = %f, height = %f, depth = %f\n", x, y, z, width, height, depth);
+        add_box(polygons, x, y, z, width, height, depth);
+        matrix_mult(peek(s), polygons);
+        draw_polygons(polygons, t, g);
+        polygons->lastcol = 0;
         break;
 
       double r;
       case SPHERE:
-        printf("SPHERE\n");
         x = op[i].op.sphere.d[0]; y = op[i].op.sphere.d[1]; z = op[i].op.sphere.d[2];
         r = op[i].op.sphere.r;
-        add_sphere(tmp, x, y, z, r, step);
+        printf("Adding sphere: (%f, %f, %f), radius %f\n", x, y, z, r);
+        add_sphere(polygons, x, y, z, r, step);
 
-        matrix_mult(peek(s), tmp);
-        draw_polygons(tmp, t, g);
-        tmp->lastcol = 0;
+        matrix_mult(peek(s), polygons);
+        draw_polygons(polygons, t, g);
+        polygons->lastcol = 0;
         break;
 
       double r0, r1;
@@ -137,20 +152,20 @@ void my_main() {
         printf("TORUS\n");
         x = op[i].op.torus.d[0]; y = op[i].op.torus.d[1]; z = op[i].op.torus.d[2];
         r0 = op[i].op.torus.r0; r1 = op[i].op.torus.r1;
-        add_torus(tmp, x, y, z, r0, r1, step);
+        add_torus(polygons, x, y, z, r0, r1, step);
 
-        matrix_mult(peek(s), tmp);
-        draw_polygons(tmp, t, g);
-        tmp->lastcol = 0;
+        matrix_mult(peek(s), polygons);
+        draw_polygons(polygons, t, g);
+        polygons->lastcol = 0;
         break;
 
       double x0, y0, z0;
       double x1, y1, z1;
       case LINE:
-        printf("LINE\n");
         x0 = op[i].op.line.p0[0]; y0 = op[i].op.line.p0[1]; z0 = op[i].op.line.p0[2];
         x1 = op[i].op.line.p1[0]; y1 = op[i].op.line.p1[1]; z1 = op[i].op.line.p1[2];
-        add_edge(tmp, x0, y0, z0, x1, y1, z1);
+        printf("Adding line: (%f, %f, %f) -> (%f, %f, %f)\n", x0, y0, z0, x1, y1, z1);
+        add_edge(polygons, x0, y0, z0, x1, y1, z1);
 
         matrix_mult(peek(s), tmp);
         draw_lines(tmp, t, g);
