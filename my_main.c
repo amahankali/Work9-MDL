@@ -67,6 +67,7 @@ void my_main() {
   struct stack *s;
   screen t;
   color g;
+  printf("CALLED\n");
 
   s = new_stack();
   tmp = new_matrix(4, 1000);
@@ -84,18 +85,21 @@ void my_main() {
         break;
 
       case MOVE:
+        printf("MOVE\n");
         tmp = make_translate(op[i].op.move.d[0], op[i].op.move.d[1], op[i].op.move.d[2]);
         matrix_mult(peek(s), tmp);
         copy_matrix(tmp, peek(s));
         break;
 
       case SCALE:
+        printf("SCALE\n");
         tmp = make_scale(op[i].op.scale.d[0], op[i].op.scale.d[1], op[i].op.scale.d[2]);
         matrix_mult(peek(s), tmp);
         copy_matrix(tmp, peek(s));
         break;
 
       case ROTATE:
+        printf("ROTATE\n");
         if(op[i].op.rotate.axis == 0) tmp = make_rotX(op[i].op.rotate.degrees * (M_PI / 180));
         if(op[i].op.rotate.axis == 1) tmp = make_rotY(op[i].op.rotate.degrees * (M_PI / 180));
         if(op[i].op.rotate.axis == 2) tmp = make_rotZ(op[i].op.rotate.degrees * (M_PI / 180));
@@ -106,6 +110,7 @@ void my_main() {
       double x, y, z;
       double width, height, depth;
       case BOX:
+        printf("BOX\n");
         x = op[i].op.box.d0[0]; y = op[i].op.box.d0[1]; z = op[i].op.box.d0[2];
         width = op[i].op.box.d1[0]; height = op[i].op.box.d1[1]; depth = op[i].op.box.d1[2];
         add_box(tmp, x, y, z, width, height, depth);
@@ -117,6 +122,7 @@ void my_main() {
 
       double r;
       case SPHERE:
+        printf("SPHERE\n");
         x = op[i].op.sphere.d[0]; y = op[i].op.sphere.d[1]; z = op[i].op.sphere.d[2];
         r = op[i].op.sphere.r;
         add_sphere(tmp, x, y, z, r, step);
@@ -128,6 +134,7 @@ void my_main() {
 
       double r0, r1;
       case TORUS:
+        printf("TORUS\n");
         x = op[i].op.torus.d[0]; y = op[i].op.torus.d[1]; z = op[i].op.torus.d[2];
         r0 = op[i].op.torus.r0; r1 = op[i].op.torus.r1;
         add_torus(tmp, x, y, z, r0, r1, step);
@@ -140,6 +147,7 @@ void my_main() {
       double x0, y0, z0;
       double x1, y1, z1;
       case LINE:
+        printf("LINE\n");
         x0 = op[i].op.line.p0[0]; y0 = op[i].op.line.p0[1]; z0 = op[i].op.line.p0[2];
         x1 = op[i].op.line.p1[0]; y1 = op[i].op.line.p1[1]; z1 = op[i].op.line.p1[2];
         add_edge(tmp, x0, y0, z0, x1, y1, z1);
@@ -153,6 +161,7 @@ void my_main() {
         break;
 
       case DISPLAY:
+        printf("DISPLAY\n");
         display(t);
         break;
     }
